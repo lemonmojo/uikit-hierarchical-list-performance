@@ -44,10 +44,14 @@ final class SidebarViewController: UIViewController {
         
         collectionView.dataSource = dataSource
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Shuffle", 
-                                                            style: .plain,
-                                                            target: self,
-                                                            action: #selector(shuffle))
+        let shuffleButton = UIBarButtonItem(title: "Shuffle",
+                                            style: .plain,
+                                            target: self,
+                                            action: #selector(shuffle))
+        
+        shuffleButton.image = .init(systemName: "shuffle.circle")
+        
+        navigationItem.rightBarButtonItem = shuffleButton
         
         self.view = collectionView
     }
