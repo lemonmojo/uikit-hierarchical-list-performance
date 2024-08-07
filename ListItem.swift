@@ -61,24 +61,3 @@ extension ListItem {
         return items
     }
 }
-
-// MARK: - Finding items by ID
-extension ListItem {
-    func itemWith(id: UUID) -> ListItem? {
-        if self.id == id {
-            return self
-        }
-        
-        guard let children else {
-            return nil
-        }
-        
-        for child in children {
-            if let foundItem = child.itemWith(id: id) {
-                return foundItem
-            }
-        }
-        
-        return nil
-    }
-}

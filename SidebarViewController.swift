@@ -10,17 +10,17 @@ final class SidebarViewController: UIViewController {
     private typealias CellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, ListItem>
     
     // Flat example data.
-//    private static let rootItem = ListItem.createFolder(leafsCount: 100_000,
-//                                                        folderIndex: 1,
-//                                                        leafStartIndex: 1)
+    private static let rootItem = ListItem.createFolder(leafsCount: 100_000,
+                                                        folderIndex: 1,
+                                                        leafStartIndex: 1)
     
     // Real-world example data with folder hierarchy.
-    private static let rootItem = ListItem(title: "Root", children: [
-        .createFolder(leafsCount: 25_000, folderIndex: 1, leafStartIndex: 1),
-        .createFolder(leafsCount: 25_000, folderIndex: 2, leafStartIndex: 25_001),
-        .createFolder(leafsCount: 25_000, folderIndex: 3, leafStartIndex: 50_001),
-        .createFolder(leafsCount: 25_000, folderIndex: 4, leafStartIndex: 75_001)
-    ])
+//    private static let rootItem = ListItem(title: "Root", children: [
+//        .createFolder(leafsCount: 25_000, folderIndex: 1, leafStartIndex: 1),
+//        .createFolder(leafsCount: 25_000, folderIndex: 2, leafStartIndex: 25_001),
+//        .createFolder(leafsCount: 25_000, folderIndex: 3, leafStartIndex: 50_001),
+//        .createFolder(leafsCount: 25_000, folderIndex: 4, leafStartIndex: 75_001)
+//    ])
     
     private var items: [ListItem] = SidebarViewController.rootItem.children ?? .init()
     
@@ -86,7 +86,6 @@ final class SidebarViewController: UIViewController {
                 
                 config.image = UIImage(systemName: treeNode.systemImage)
                 config.text = treeNode.title
-                config.secondaryText = treeNode.id.uuidString
                 
                 cell.contentConfiguration = config
                 
@@ -113,7 +112,8 @@ final class SidebarViewController: UIViewController {
         func addItemsRecursively(_ nodes: [ListItem], to parent: ListItem?) {
             nodes.forEach { node in
                 // for each node we add its children, then recurse into the children nodes
-                if let children = node.children, !children.isEmpty {
+                if let children = node.children,
+                   !children.isEmpty {
                     sectionSnapshot.append(children, to: node)
                     addItemsRecursively(children, to: node)
                 }
@@ -121,23 +121,13 @@ final class SidebarViewController: UIViewController {
         }
         
         addItemsRecursively(treeNodes, to: nil)
-        dataSource.apply(sectionSnapshot, to: section, animatingDifferences: true)
+        dataSource.apply(sectionSnapshot, to: section, animatingDifferences: false)
     }
 }
 
 extension SidebarViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, 
                         didSelectItemAt indexPath: IndexPath) {
-        guard let cell = collectionView.cellForItem(at: indexPath),
-              let config = cell.contentConfiguration as? UIListContentConfiguration,
-              let idStr = config.secondaryText,
-              let id = UUID(uuidString: idStr),
-              let item = Self.rootItem.itemWith(id: id) else {
-            selectedItem = nil
-            
-            return
-        }
-        
-        selectedItem = item
+        selectedItem = dataSource.itemIdentifier(for: indexPath)
     }
 }
