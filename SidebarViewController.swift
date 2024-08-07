@@ -46,13 +46,26 @@ final class SidebarViewController: UIViewController {
         
         collectionView.dataSource = dataSource
         
-        view = collectionView
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Shuffle", 
+                                                            style: .plain,
+                                                            target: self,
+                                                            action: #selector(shuffle))
+        
+        self.view = collectionView
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         applySnapshot(treeNodes: items, to: .main)
+    }
+    
+    @objc
+    private func shuffle() {
+        items = items.shuffled()
+        
+        applySnapshot(treeNodes: items, to: .main)
+        collectionView.reloadData()
     }
     
     private static func createCollectionView(delegate: UICollectionViewDelegate) -> UICollectionView {
