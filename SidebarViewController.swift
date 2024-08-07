@@ -24,13 +24,11 @@ final class SidebarViewController: UIViewController {
     
     private var items: [ListItem] = SidebarViewController.rootItem.children ?? .init()
     
+    var didSelectItem: ((_ item: ListItem?) -> Void)?
+    
     private var selectedItem: ListItem? {
         didSet {
-            let contentViewController = ContentViewController()
-            let viewController = UINavigationController(rootViewController: contentViewController)
-            
-            showDetailViewController(viewController, sender: self)
-            contentViewController.item = selectedItem
+            didSelectItem?(selectedItem)
         }
     }
     
@@ -72,7 +70,8 @@ final class SidebarViewController: UIViewController {
         let config = UICollectionLayoutListConfiguration(appearance: .sidebar)
         let layout = UICollectionViewCompositionalLayout.list(using: config)
         
-        let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(frame: .zero,
+                                              collectionViewLayout: layout)
         
         collectionView.delegate = delegate
         
@@ -90,12 +89,16 @@ final class SidebarViewController: UIViewController {
                 cell.contentConfiguration = config
                 
                 // include disclosure indicator for nodes with children
-                cell.accessories = treeNode.children != nil ? [.outlineDisclosure()] : []
+                cell.accessories = treeNode.children != nil 
+                    ? [ .outlineDisclosure() ]
+                    : .init()
             }
         }()
         
         return DS(collectionView: collectionView) { collectionView, indexPath, treeNode -> UICollectionViewCell? in
-            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: treeNode)
+            collectionView.dequeueConfiguredReusableCell(using: cellRegistration,
+                                                         for: indexPath,
+                                                         item: treeNode)
         }
     }
     
@@ -103,14 +106,16 @@ final class SidebarViewController: UIViewController {
         // reset section
         var snapshot = DSSnapshot()
         snapshot.appendSections([section])
-        dataSource.apply(snapshot, animatingDifferences: false)
+        
+        dataSource.apply(snapshot,
+                         animatingDifferences: false)
         
         // initial snapshot with the root nodes
         var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem>()
         sectionSnapshot.append(treeNodes)
         
         func addItemsRecursively(_ nodes: [ListItem], to parent: ListItem?) {
-            nodes.forEach { node in
+            for node in nodes {
                 // for each node we add its children, then recurse into the children nodes
                 if let children = node.children,
                    !children.isEmpty {
@@ -121,7 +126,10 @@ final class SidebarViewController: UIViewController {
         }
         
         addItemsRecursively(treeNodes, to: nil)
-        dataSource.apply(sectionSnapshot, to: section, animatingDifferences: false)
+        
+        dataSource.apply(sectionSnapshot,
+                         to: section,
+                         animatingDifferences: false)
     }
 }
 

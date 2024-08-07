@@ -24,6 +24,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         self.window = window
         
+        sidebarViewController.didSelectItem = { [weak self] item in
+            guard let self else { return }
+            
+            let contentViewController = ContentViewController()
+            let viewController = UINavigationController(rootViewController: contentViewController)
+            
+            splitViewController.showDetailViewController(viewController, sender: self)
+            contentViewController.item = item
+        }
+        
         return true
     }
 }
